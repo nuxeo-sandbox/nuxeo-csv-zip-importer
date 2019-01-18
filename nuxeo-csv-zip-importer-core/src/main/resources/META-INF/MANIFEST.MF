@@ -1,0 +1,10 @@
+Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: .
+Manifest-Version: 1.0
+Bundle-Vendor: nuxeo.csv.zip.importer
+Bundle-Version: 1.0.0
+Bundle-Name: nuxeo-csv-zip-importer-core
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: nuxeo.csv.zip.importer.nuxeo-csv-zip-importer-core;singleton=true
+Nuxeo-Component: OSGI-INF/operations-contrib.xml,
+ OSGI-INF/plugin-contrib.xml

@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<component name="com.sai.global.core.plugin" version="1.0">
+
+  <extension point="plugins"
+    target="org.nuxeo.ecm.platform.filemanager.service.FileManagerService">
+    <plugin class="nuxeo.csv.zip.importer.CSVZipImporter"
+      name="CSVZipImporter" order="11">
+      <filter>application/zip</filter>
+    </plugin>
+  </extension>
+
+</component>
