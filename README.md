@@ -5,7 +5,7 @@ _(TBD)_
 
 This plug-in allows users to drop a zip file containing files to import and a `data.csv` file. The zip will be expanded and Documents created accordingly to the csv.
 
-Syntax for the CSV file is the same as the default [CSV Importer](https://doc.nuxeo.com/nxdoc/nuxeo-csv/), in the file:content column, set the exact name of the file stored in the zip.
+Syntax for the CSV file is the same as the default [CSV Importer](https://doc.nuxeo.com/nxdoc/nuxeo-csv/), in the file:content column, set the exact key of the file stored in the zip.
 
 So, for example, say we have a zip file containing the following...
 
@@ -29,12 +29,33 @@ Dropping this file in a container will create 3 documents:
 * A `Picture`, whose title is `An Image` and whose blob is the `image.jpg` found in the .zip
 * A `Video`, whose title is `A Video` and whose blob is the `video.mp4` found in the .zip
 
+You will have the same result if files to import ar in subfolders: The relative path to in `data.csv` must match the key. For texample, the following will get the same results as above:
+
+```
+data?csv
+files
+  file.pdf
+images
+  image.jpg
+videos
+  video.mp4
+```
+
+With `data.csv`:
+
+```
+type,name,dc:title,file:content
+File,file,A File,files/file.pdf
+File,image,An Image,images/image.jpg
+File,video,A Video,videos/video.mp4
+```
+
 
 ## WARNINGS - Please, Read
 
 ### Format of the .zip
 
-As explained above, the `data.csv` and related files must all be at first level in the .zip. The plug-in will not work if you zip a folder for example. So, usually, on your Desktop, put everything in the same folder, then select the `data.csv` file and the files to add, then compress as .zip.
+As explained above, the `data.csv` file must be at very first level of the zip, not inside a container (`myfolder/data.csv` => data.csv is not found and the .zip will be imported as is, with no extraction). The plug-in will not work if you zip a folder for example. So, usually, on your Desktop, put everything in the same folder. Files to import can be in subfolders, just set the `file:content` value accordingly (see example above). then select the `data.csv` file and the files to add, then compress as .zip.
 
 ### Field Storage for the Blob and Tests
 
