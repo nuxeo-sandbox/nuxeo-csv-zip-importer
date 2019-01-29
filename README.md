@@ -3,7 +3,7 @@
 QA status<br/>
 _(TBD)_
 
-This plug-in allows users to drop a zip file containing files to import and a `data.csv` file. The zip will be expanded and Documents created accordingly to the csv.
+This plug-in allows users to drop a zip file containing files to import and a `data.csv` file. The zip will be expanded and Documents will be created accordingly to the csv: Type of document and metadata.
 
 Syntax for the CSV file is the same as the default [CSV Importer](https://doc.nuxeo.com/nxdoc/nuxeo-csv/), in the file:content column, set the exact key of the file stored in the zip.
 
