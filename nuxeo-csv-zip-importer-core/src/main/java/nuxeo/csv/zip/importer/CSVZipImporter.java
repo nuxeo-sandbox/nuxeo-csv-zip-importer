@@ -67,8 +67,8 @@ import org.nuxeo.ecm.core.schema.types.primitives.IntegerType;
 import org.nuxeo.ecm.core.schema.types.primitives.LongType;
 import org.nuxeo.ecm.core.schema.types.primitives.StringType;
 import org.nuxeo.ecm.directory.DirectoryEntryResolver;
+import org.nuxeo.ecm.platform.filemanager.api.FileImporterContext;
 import org.nuxeo.ecm.platform.filemanager.service.extension.AbstractFileImporter;
-import org.nuxeo.ecm.platform.types.TypeManager;
 import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.transaction.TransactionHelper;
 
@@ -80,11 +80,11 @@ import org.nuxeo.runtime.transaction.TransactionHelper;
 public class CSVZipImporter extends AbstractFileImporter {
 
     private static final long serialVersionUID = 1L;
-    
+
     public static final String DOCUMENT_HANDLED_BY_CSV_ZIP_IMPORTER = "DocumentHandledByCsvZipImporter";
-    
+
     public static final String CSV_ZIP_IMPORT_DONE_EVENT = "CsvZipImportDone";
-    
+
     public static final int COMMIT_MODULO = 100;
 
     private static final String MARKER = "data.csv";
@@ -116,16 +116,15 @@ public class CSVZipImporter extends AbstractFileImporter {
     }
 
     @Override
-    public DocumentModel create(CoreSession documentManager, Blob content, String path, boolean overwrite,
-            String filename, TypeManager typeService) throws IOException {
+    public DocumentModel createOrUpdate(FileImporterContext context) throws IOException {
         ZipFile zip = null;
-        try (CloseableFile source = content.getCloseableFile()) {
+        try (CloseableFile source = context.getBlob().getCloseableFile()) {
             zip = getArchiveFileIfValid(source.getFile());
             if (zip == null) {
                 return null;
             }
 
-            DocumentModel container = documentManager.getDocument(new PathRef(path));
+            DocumentModel container = context.getSession().getDocument(new PathRef(context.getParentPath()));
 
             ZipEntry index = zip.getEntry(MARKER);
             try (Reader reader = new InputStreamReader(zip.getInputStream(index));
@@ -155,16 +154,16 @@ public class CSVZipImporter extends AbstractFileImporter {
                     // Check if document already exists
                     DocumentModel targetDoc = null;
                     if (id != null) {
-                        String targetPath = new Path(path).append(id).toString();
-                        if (documentManager.exists(new PathRef(targetPath))) {
-                            targetDoc = documentManager.getDocument(new PathRef(targetPath));
+                        String targetPath = new Path(context.getParentPath()).append(id).toString();
+                        if (context.getSession().exists(new PathRef(targetPath))) {
+                            targetDoc = context.getSession().getDocument(new PathRef(targetPath));
                             updateDoc = true;
                         }
                     } else {
                         // Check for existing document with name if id wasn't provided
-                        String targetPath = new Path(path).append(name).toString();
-                        if (documentManager.exists(new PathRef(targetPath))) {
-                            targetDoc = documentManager.getDocument(new PathRef(targetPath));
+                        String targetPath = new Path(context.getParentPath()).append(name).toString();
+                        if (context.getSession().exists(new PathRef(targetPath))) {
+                            targetDoc = context.getSession().getDocument(new PathRef(targetPath));
                             updateDoc = true;
                         }
                     }
@@ -182,7 +181,7 @@ public class CSVZipImporter extends AbstractFileImporter {
                             String title = stringValues.get("dc:title");
                             name = (title != null && !title.isEmpty()) ? title : id;
                         }
-                        targetDoc = documentManager.createDocumentModel(path, name, type);
+                        targetDoc = context.getSession().createDocumentModel(context.getParentPath(), name, type);
                     }
 
                     // update doc properties
@@ -224,7 +223,7 @@ public class CSVZipImporter extends AbstractFileImporter {
                         }
 
                         if (field != null) {
-                            Serializable fieldValue = getFieldValue(field, stringValue, zip, documentManager);
+                            Serializable fieldValue = getFieldValue(field, stringValue, zip, context.getSession());
                             if (usePrefix) {
                                 targetDoc.setPropertyValue(fname, fieldValue);
                             } else {
@@ -235,23 +234,24 @@ public class CSVZipImporter extends AbstractFileImporter {
 
                     targetDoc.putContextData(DOCUMENT_HANDLED_BY_CSV_ZIP_IMPORTER, true);
                     if (updateDoc) {
-                        targetDoc = documentManager.saveDocument(targetDoc);
+                        targetDoc = context.getSession().saveDocument(targetDoc);
                     } else {
-                        targetDoc = documentManager.createDocument(targetDoc);
+                        targetDoc = context.getSession().createDocument(targetDoc);
                     }
-                    count +=1;
-                    if((count % COMMIT_MODULO) == 0) {
+                    count += 1;
+                    if ((count % COMMIT_MODULO) == 0) {
                         TransactionHelper.commitOrRollbackTransaction();
                         TransactionHelper.startTransaction();
                     }
                 }
             }
-            
-            EventContextImpl evctx = new DocumentEventContext(documentManager, documentManager.getPrincipal(), container);
+
+            EventContextImpl evctx = new DocumentEventContext(context.getSession(), context.getSession().getPrincipal(),
+                    container);
             Event eventToSend = evctx.newEvent(CSV_ZIP_IMPORT_DONE_EVENT);
             EventService eventService = Framework.getService(EventService.class);
             eventService.fireEvent(eventToSend);
-            
+
             return container;
         } finally {
             IOUtils.closeQuietly(zip);

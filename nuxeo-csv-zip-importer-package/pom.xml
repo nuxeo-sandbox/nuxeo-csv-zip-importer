@@ -3,12 +3,12 @@
   <parent>
     <groupId>nuxeo.csv.zip.importer</groupId>
     <artifactId>nuxeo-csv-zip-importer-parent</artifactId>
-    <version>9.10-SNAPSHOT</version>
+    <version>10.10-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
   <artifactId>nuxeo-csv-zip-importer-package</artifactId>
-  <version>9.10-SNAPSHOT</version>
+  <version>10.10-SNAPSHOT</version>
   <packaging>zip</packaging>
   <name>Nuxeo csv zip importer package - Nuxeo csv zip importer</name>
 

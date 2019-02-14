@@ -51,25 +51,21 @@ import org.nuxeo.runtime.test.runner.FeaturesRunner;
 import org.nuxeo.runtime.transaction.TransactionHelper;
 
 /**
- * 
  * @since 9.10
  */
 @RunWith(FeaturesRunner.class)
 @Features(AutomationFeature.class)
 @RepositoryConfig(init = DefaultRepositoryInit.class, cleanup = Granularity.METHOD)
-@Deploy({"org.nuxeo.ecm.csv.core",
-    "org.nuxeo.ecm.platform.types.api",
-    "org.nuxeo.ecm.platform.types.core",
-    "org.nuxeo.ecm.platform.filemanager.api",
-    "org.nuxeo.ecm.platform.filemanager.core",
-    "nuxeo.csv.zip.importer.nuxeo-csv-zip-importer-core"})
+@Deploy({ "org.nuxeo.ecm.csv.core", "org.nuxeo.ecm.platform.types.api", "org.nuxeo.ecm.platform.types.core",
+        "org.nuxeo.ecm.platform.filemanager.api", "org.nuxeo.ecm.platform.filemanager.core",
+        "nuxeo.csv.zip.importer.nuxeo-csv-zip-importer-core" })
 public class TestCSVZipImporter {
 
     @Inject
     protected CoreSession coreSession;
-    
+
     protected DocumentModel testFolder;
-    
+
     @Before
     public void create_data() {
         // Create ContentLibrary
@@ -81,39 +77,37 @@ public class TestCSVZipImporter {
         TransactionHelper.commitOrRollbackTransaction();
         TransactionHelper.startTransaction();
     }
-    
+
     @After
     public void cleanup() {
         coreSession.removeDocument(testFolder.getRef());
     }
-    
+
     @Test
     public void shouldImportCsvZip() throws Exception {
-        
+
         File zipFile = FileUtils.getResourceFileFromContext("test-1.zip");
         Blob zipBlob = new FileBlob(zipFile);
-        
-        FileManager fm = Framework.getService(FileManager.class);
-        DocumentModel doc = fm.createDocumentFromBlob(coreSession, zipBlob, testFolder.getPathAsString(), true, "test-1.zip");
-                
+
+        DocumentModel doc = TestCommons.createDocumentFromBlob(coreSession, zipBlob, testFolder.getPathAsString());
+
         assertNotNull(doc);
         // Should return the container
         assertEquals(doc.getId(), testFolder.getId());
-        
+
         String testResult = TestCommons.checkWithTest1Zip(coreSession, doc);
         assertEquals("Wrong result: " + testResult, TestCommons.RESULT_OK, testResult);
-        
+
     }
-    
+
     @Test
     public void shouldNotImportNonCsvZip() throws Exception {
-        
+
         File zipFile = FileUtils.getResourceFileFromContext("not-a-csv-zip.zip");
         Blob zipBlob = new FileBlob(zipFile);
-        
-        FileManager fm = Framework.getService(FileManager.class);
-        DocumentModel doc = fm.createDocumentFromBlob(coreSession, zipBlob, testFolder.getPathAsString(), true, "not-a-csv-zip.zip");
-        
+
+        DocumentModel doc = TestCommons.createDocumentFromBlob(coreSession, zipBlob, testFolder.getPathAsString());
+
         assertNotNull(doc);
         assertFalse(doc.hasFacet("Folderish"));
         Blob blob = (Blob) doc.getPropertyValue("file:content");

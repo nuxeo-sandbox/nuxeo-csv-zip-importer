@@ -62,7 +62,7 @@ public class TestCSVZipImporterOp {
 
     @After
     public void cleanup() {
-        coreSession.removeDocument(new PathRef("/"));
+        coreSession.removeDocument(testFolder.getRef());
     }
 
     @Test

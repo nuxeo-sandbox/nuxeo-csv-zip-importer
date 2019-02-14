@@ -4,7 +4,7 @@
   <extension point="plugins"
     target="org.nuxeo.ecm.platform.filemanager.service.FileManagerService">
     <plugin class="nuxeo.csv.zip.importer.CSVZipImporter"
-      name="CSVZipImporter" order="11">
+      name="CSVZipImporter" order="11" docType="File">
       <filter>application/zip</filter>
     </plugin>
   </extension>
