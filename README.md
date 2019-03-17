@@ -1,7 +1,7 @@
 # nuxeo-csv-zip-importer
 
-QA status<br/>
-_(TBD)_
+
+QA build status: ![Build Status](https://qa.nuxeo.org/jenkins/buildStatus/icon?job=Sandbox/sandbox_nuxeo-csv-zip-importer-master)
 
 This plug-in allows users to drop a zip file containing files to import and a `data.csv` file. The zip will be expanded and Documents will be created accordingly to the csv: Type of document and metadata.
 
